@@ -1,0 +1,10 @@
+[Unit]
+Description=Updates Launcher each start
+
+[Service]
+ExecStart=git clone https://github.com/rtroe/launchr.git
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
