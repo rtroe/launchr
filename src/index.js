@@ -27,8 +27,13 @@ function Refresh() {
         inst.p.kill();
     });
 
+    try
+    {
    execSync(`rm -r ./metric-netplay-server`);
-    console.log("Pulling latest");
+    }catch(e){
+        console.log(e);
+    } 
+   console.log("Pulling latest");
 
     clone(config.repo, './metric-netplay-server', [], function () {
         console.log("done");
@@ -85,7 +90,7 @@ app.get('/procs', (req, res) => {
 });
 
 app.get('/reboot', (req, res) => {
-
+    res.send({status:"reboot machine"});
     execSync(`systemctl start reboot.target`);
 });
 
