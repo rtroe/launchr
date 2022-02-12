@@ -27,6 +27,8 @@ function Refresh()
         inst.p.kill();
     });
     
+    execSync(`rm -r ./metric-netplay-server`);
+    
     clone(config.repo, './metric-netplay-server', [], function () {
         console.log("done");
         
@@ -65,7 +67,7 @@ app.get('/', (req, res) => {
     
     var resObj = {
         name:"test server",
-        version: "0.1.2",
+        version: "0.1.3",
         uptime: os.uptime(),
         processes:procs
     }
@@ -78,6 +80,12 @@ app.get('/procs', (req, res) => {
     
     res.send(procs);
   });
+
+  app.get('/reboot', (req, res) => {
+      
+  execSync(`reboot`);
+    });
+  
   
 app.get('/refresh', (req, res) => {
     
