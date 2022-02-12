@@ -65,7 +65,7 @@ app.get('/', (req, res) => {
     
     var resObj = {
         name:"test server",
-        version: "0.1.0",
+        version: "0.1.2",
         uptime: os.uptime(),
         processes:procs
     }
