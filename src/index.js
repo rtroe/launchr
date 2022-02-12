@@ -27,7 +27,7 @@ function Refresh() {
         inst.p.kill();
     });
 
-   // execSync(`rm -r ./metric-netplay-server`);
+   execSync(`rm -r ./metric-netplay-server`);
     console.log("Pulling latest");
 
     clone(config.repo, './metric-netplay-server', [], function () {
