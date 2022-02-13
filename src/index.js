@@ -10,13 +10,15 @@ const app = express();
 
 let procs = [];
 
-let logs = [];
+let logs = {};
 
 let config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 // console.log(config);
 // console.log(os.type());
 // console.log(os.platform());
+
+let serverBinPath = './metric-netplay-server'
 
 let platform = config[os.platform()];
 
@@ -27,18 +29,19 @@ function Refresh() {
         inst.p.kill();
     });
 
+    procs=[];
     try
     {
-   execSync(`rm -r ./metric-netplay-server`);
+    execSync(`rm -r ./metric-netplay-server`);
     }catch(e){
         console.log(e);
     } 
    console.log("Pulling latest");
 
-    clone(config.repo, './metric-netplay-server', [], function () {
+    clone(config.repo, serverBinPath, [], function () {
         console.log("done");
 
-        const filePath = `${process.cwd()}/metric-netplay-server/${platform.proc_path}/${platform.proc_name}`;
+        const filePath = `${process.cwd()}/${serverBinPath}/${platform.proc_path}/${platform.proc_name}`;
 
         console.log("setting permissons")
         execSync(`chmod +x ${filePath}`);
@@ -51,15 +54,18 @@ function Refresh() {
             proc["port"] = `1424${i + 1}`;
 
             const child = spawn(filePath, ['-n', proc["name"], '-p', proc["port"]]);
+            
+            // instantiate the logs for this process
+            logs[proc.name]=[];
 
             child.stdout.on('data', data => {
-                console.log(`stdout${i}:${data}`);
-                logs.push(`stdout${i}:${data}`);
+                console.log(`log${i}:${data}`);
+                logs[proc.name].push(`log${i}:${data}`);
             });
 
             child.stderr.on('data', data => {
-                console.error(`stderr${i}: ${data}`);
-                logs.push(`stderr${i}:${data}`);
+                console.error(`err${i}: ${data}`);
+                logs[proc.name].push(`err${i}:${data}`);
             });
 
             proc["pid"] = child.pid;
@@ -73,11 +79,26 @@ function Refresh() {
 
 app.get('/', (req, res) => {
 
+    var procList = [];
+    // load the server jsons
+    procs.forEach(prc=>{
+        try
+        {
+        let pson = JSON.parse(fs.readFileSync(`server-${prc.name}.json`, 'utf8'));
+        pson["isAlive"]=(prc.p.exitCode == null && prc.p.killed == false && prc.p.signalCode == null);
+        
+        procList.push(pson);
+        }
+        catch(e){
+            console.error(e);
+        }
+    });
+
     var resObj = {
-        name: "test server",
-        version: "0.1.4",
+        name: os.hostname(),
+        version: config.version,
         uptime: os.uptime(),
-        processes: procs
+        processes: procList
     }
     res.send(resObj);
 
@@ -109,9 +130,10 @@ app.get('/logs', (req, res) => {
     res.send(logs);
 });
 
-app.listen(3000, () => {
+var port = 4949;
+app.listen(port, () => {
 
-    console.log('App is listening on port 3000.');
+    console.log(`App is listening on port ${port}.`);
     Refresh();
 
 });

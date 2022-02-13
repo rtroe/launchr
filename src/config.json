@@ -1,5 +1,6 @@
 {
     "repo":"https://github.com/virtexedge/metric-netplay-server.git",
+    "version":"0.1.5",
     "windows":{
         "proc_name":"MetricRacerNetServer.exe",
         "proc_path":"win-x64",
