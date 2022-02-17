@@ -32,6 +32,12 @@ let serverBinPath = './metric-netplay-server'
 
 let platform = config[os.platform()];
 
+function getTime(){
+    return new Date().toISOString().
+  replace(/T/, ' ').      // replace T with a space
+  replace(/\..+/, '')     // delete the dot and everything after
+}
+
 function Refresh() {
 
     procs.forEach(inst => {
@@ -69,8 +75,9 @@ function Refresh() {
             logs[proc.name]=[];
 
             child.stdout.on('data', data => {
-                console.log(`log${i}:${data}`);
-                logs[proc.name].push(`log${i}:${data}`);
+                let line = `[${getTime()}]:${data}`;
+                console.log(line);
+                logs[proc.name].push(line);
             });
 
             child.stderr.on('data', data => {
